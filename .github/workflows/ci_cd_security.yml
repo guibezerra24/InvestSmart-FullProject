@@ -141,8 +141,9 @@ jobs:
 
       - name: Nikto Scan
         run: |
-          sudo docker pull sullo/nikto
-          sudo docker run --rm --network host sullo/nikto -host http://127.0.0.1:8000 > nikto.txt || true
+          sudo apt-get update
+          sudo apt-get install -y nikto
+          nikto -host http://127.0.0.1:8000 -ask no -maxtime 60s -output nikto.txt || true
           
       - name: Consolidate evidence (payloads + mitigations)
         run: python tools/consolidate_evidence.py
