@@ -81,6 +81,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install semgrep
 
+    # Gera SARIF (para Security/PR). Usa 'scan' e salva no arquivo.
     - name: Semgrep SARIF
       run: |
         semgrep scan \
@@ -88,17 +89,19 @@ jobs:
           --config r/python \
           --config r/secrets \
           --config r/owasp-top-ten \
+          --severity=ERROR \
           --sarif -o semgrep-results.sarif || true
-        # garante arquivo mesmo se der erro antes
         [ -f semgrep-results.sarif ] || echo '{"runs":[]}' > semgrep-results.sarif
 
-    - name: Semgrep JSON (artifact)
+    # Gera JSON (artefato pra baixar)
+    - name: Semgrep JSON
       run: |
         semgrep scan \
           --config p/ci \
           --config r/python \
           --config r/secrets \
           --config r/owasp-top-ten \
+          --severity=ERROR \
           --json -o semgrep-results.json || true
         [ -f semgrep-results.json ] || echo '{}' > semgrep-results.json
 
@@ -115,6 +118,7 @@ jobs:
         path: |
           semgrep-results.sarif
           semgrep-results.json
+
 
   dast:
     name: DAST (ZAP baseline + Nikto)
