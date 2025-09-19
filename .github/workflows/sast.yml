@@ -1,0 +1,23 @@
+name: SAST
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+jobs:
+  semgrep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pipx install semgrep
+      - run: |
+          semgrep ci             --config p/ci             --config r/python             --config r/secrets             --config r/owasp-top-ten             --sarif --output semgrep-results.sarif             --json --output-json semgrep-results.json             --error --severity=HIGH --severity=CRITICAL
+      - uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep-results.sarif
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sast-semgrep
+          path: |
+            semgrep-results.sarif
+            semgrep-results.json
